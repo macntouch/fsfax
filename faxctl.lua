@@ -69,7 +69,6 @@ if (argv[1] == "init") then
 
 		api:executeString("complete add fax config");
 		api:executeString("complete add fax config show");
-		api:executeString("complete add fax config show all");
 		api:executeString("complete add fax config set");
 
 	end
