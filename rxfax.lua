@@ -5,13 +5,33 @@ caller_id_number     = session:getVariable("caller_id_number")
 destination_number   = session:getVariable("destination_number")
 
 
--- simple log notification that we're taking a call.
+-- console notification that we're taking a call.
 freeswitch.consoleLog("info","fsfax: " .. uuid .. ": Taking call from " .. caller_id_number .. " for " .. destination_number .. "\n")
 
 
-local dbh = freeswitch.Dbh("sqlite://fsfax")  -- /var/lib/freeswitch/db/
+local dbh = freeswitch.Dbh("sqlite://fsfax")  -- /var/lib/freeswitch/db/fsfax.db
 assert(dbh:connected()) -- exits the script if we didn't connect properly
 
+
+-- Query DB for settings to use for this call
+query = "SELECT key, value FROM fsfax_config "
+..      "WHERE type='session' "
+..      "AND ( "
+..      "      (match_key='*'   AND match_value='*' ) "
+..      "   OR (match_key='DID' AND match_value='" .. destination_number .. "') " 
+..      "   OR (match_key='CID' AND match_value='" .. caller_id_number .. "') "
+..      "    ) "
+..      "order by match_key, match_value, type, key, rank"
+
+
+dbh:query(query, 
+	function(row)
+	freeswitch.consoleLog("info","fsfax: setting session key " .. row.key .. " => " .. row.value .. "\n")
+		session:setVariable(row.key, row.value)
+	end)
+
+
+-- Query DB for DID routing
 dbh:query("SELECT * FROM fsfax_route where did='" .. destination_number .. "'", 
 	function(row)
 		emailto = row.emailto
@@ -25,28 +45,6 @@ if (emailto == nil) then
 	return
 end
 
-
--- http://wiki.freeswitch.org/wiki/Mod_spandsp
--- session:setVariable("t38_gateway_detect_timeout"   , "")
-session:setVariable("fax_enable_t38"               , "true")
-session:setVariable("fax_enable_t38_request"       , "true")
--- session:setVariable("fax_enable_t38_insist"        , "true")
--- session:setVariable("FAX_DISABLE_ECM"              , "true")
--- session:setVariable("fax_disable_v17"              , "true")
--- session:setVariable("fax_end_page"                 , "true")
--- session:setVariable("fax_force_caller"             , "true")
--- session:setVariable("fax_ident"                    , "true")
--- session:setVariable("fax_header"                   , "true")
--- session:setVariable("fax_prefix"                   , "true")
--- session:setVariable("fax_start_page"               , "true")
--- session:setVariable("fax_use_ecm"                  , "true")
--- session:setVariable("fax_v17_disabled"             , "true")
-session:setVariable("fax_verbose"                  , "true")
--- session:setVariable("t38_peer"                     , "true")
--- session:setVariable("t38_trace"                    , "true")
-
--- not sure if this is needed for an inbound fax?
-session:setVariable("ignore_early_media", "true");
 
 
 
@@ -77,7 +75,6 @@ local fsfax_hangup_time =  os.time();
 local fsfax_call_duration = fsfax_hangup_time - fsfax_answered_time;
 
 
-
 --[[
 *****************************************************************************
 Now the that the fax call is finished we will gather up a bunch of variables 
@@ -101,10 +98,10 @@ ignore_early_media   = session:getVariable("ignore_early_media");
 if (ignore_early_media == nil) then ignore_early_media = ''; end
 
 -- wiki.freeswitch.org/wiki/Mod_spandsp
-t38_leg                        = session:getVariable("t38_leg"); if (t38_leg == nil) then t38_leg = ''; end
+t38_leg = session:getVariable("t38_leg");
 if (t38_leg == nil) then t38_leg = ''; end
 
-fax_bad_rows                   = session:getVariable("fax_bad_rows")
+fax_bad_rows = session:getVariable("fax_bad_rows")
 if (fax_bad_rows == nil) then fax_bad_rows = ''; end
 
 fax_document_total_pages = session:getVariable("fax_document_total_pages")
@@ -113,55 +110,55 @@ if (fax_document_total_pages == nil) then fax_document_total_pages = ''; end
 fax_document_transferred_pages = session:getVariable("fax_document_transferred_pages")
 if (fax_document_transferred_pages == nil) then fax_document_transferred_pages = ''; end
 
-fax_ecm_requested              = session:getVariable("fax_ecm_requested") 
+fax_ecm_requested = session:getVariable("fax_ecm_requested") 
 if (fax_ecm_requested == nil) then fax_ecm_requested = ''; end
 
-fax_ecm_used                   = session:getVariable("fax_ecm_used")
+fax_ecm_used = session:getVariable("fax_ecm_used")
 if (fax_ecm_used == nil) then fax_ecm_used = ''; end
 
-fax_filename                   = session:getVariable("fax_filename")
+fax_filename = session:getVariable("fax_filename")
 if (fax_filename == nil) then fax_filename = ''; end
 
-fax_image_resolution           = session:getVariable("fax_image_resolution")
+fax_image_resolution = session:getVariable("fax_image_resolution")
 if (fax_image_resolution == nil) then fax_image_resolution = ''; end
 
-fax_image_size                 = session:getVariable("fax_image_size")
+fax_image_size = session:getVariable("fax_image_size")
 if (fax_image_size == nil) then fax_image_size = ''; end
 
-fax_local_station_id           = session:getVariable("fax_local_station_id")
+fax_local_station_id = session:getVariable("fax_local_station_id")
 if (fax_local_station_id == nil) then fax_local_station_id = ''; end
 
-fax_result_code                = session:getVariable("fax_result_code")
+fax_result_code = session:getVariable("fax_result_code")
 if (fax_result_code == nil) then fax_result_code = ''; end
 
-fax_result_text                = session:getVariable("fax_result_text")
+fax_result_text = session:getVariable("fax_result_text")
 if (fax_result_text == nil) then fax_result_text = ''; end
 
-fax_remote_station_id          = session:getVariable("fax_remote_station_id")
+fax_remote_station_id = session:getVariable("fax_remote_station_id")
 if (fax_remote_station_id == nil) then fax_remote_station_id = ''; end
 
-fax_success                    = session:getVariable("fax_success")
+fax_success = session:getVariable("fax_success")
 if (fax_success == nil) then fax_success = ''; end
 
-fax_transfer_rate              = session:getVariable("fax_transfer_rate")
+fax_transfer_rate = session:getVariable("fax_transfer_rate")
 if (fax_transfer_rate == nil) then fax_transfer_rate  = ''; end
 
-fax_v17_disabled               = session:getVariable("fax_v17_disabled")
+fax_v17_disabled = session:getVariable("fax_v17_disabled")
 if (fax_v17_disabled == nil) then fax_v17_disabled = ''; end
 
-jitterbuffer_msec              = session:getVariable("jitterbuffer_msec") 
+jitterbuffer_msec = session:getVariable("jitterbuffer_msec") 
 if (jitterbuffer_msec == nil) then jitterbuffer_msec = ''; end
 
-rtp_autoflush_during_bridge    = session:getVariable("rtp_autoflush_during_bridge") 
+rtp_autoflush_during_bridge = session:getVariable("rtp_autoflush_during_bridge") 
 if (rtp_autoflush_during_bridge == nil) then rtp_autoflush_during_bridge = ''; end
 
-t38_gateway_format             = session:getVariable("t38_gateway_format") 
+t38_gateway_format = session:getVariable("t38_gateway_format") 
 if (t38_gateway_format == nil) then t38_gateway_format = ''; end
 
-t38_peer                       = session:getVariable("t38_peer");  
+t38_peer = session:getVariable("t38_peer");  
 if (t38_peer == nil) then t38_peer = ''; end
 
-t38_trace_read                 = session:getVariable("t38_trace_read"); 
+t38_trace_read = session:getVariable("t38_trace_read"); 
 if (t38_trace_read == nil) then t38_trace_read = ''; end
 
 

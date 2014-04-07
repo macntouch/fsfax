@@ -10,7 +10,7 @@ if (argv[1] == nil) then
 	..	"Usage: fax [category] [command] [arguments]\n"
 	..	"init          - \n"
 	..	"config        - \n"
-	..	"database      - database related functions\n"
+	..	"db            - database related functions\n"
 	..	"route         - manage fax routing\n"
 	..	"stats         - \n"
 	..	"** Please note, the api is likely to change A LOT ** \n"
@@ -23,6 +23,7 @@ if (argv[1] == "init") then
 
 	if (argv[2] == nil) then
 		stream:write("-USAGE: init [all, alias, complete]")
+		return
 	end
 	
 	if (argv[2] == "alias" or argv[2] == "all") then
@@ -83,15 +84,79 @@ end
 
 if (argv[1] == "config") then
 
+	-- temp section to test how configuration is applied
+	if (argv[2] == "test") then
+		
+
+		query = "SELECT * FROM fsfax_config "
+		..      "WHERE type='session' "
+		..      "AND ( "
+		..      "      (match_key='*'   AND match_value='*' ) "
+		..      "   OR (match_key='DID' AND match_value='19187790871') " 
+		..      "   OR (match_key='CID' AND match_value='8779263747') "
+		..      "   OR (match_key='AID' AND match_value='1' ) "
+		..      "    ) "
+		..      "order by match_key, match_value, type, key, rank"
+
+		stream:write(query)
+
+		stream:write(string.format("\n\n| %10s | %10s | %10s | %15s | %10s | %25s | %25s |\n", "ID", "RANK", "MATCH_KEY", "MATCH_VALUE", "TYPE", "KEY", "VALUE"))
+		dbh:query(query, function(row)
+			stream:write(string.format("| %10s | %10s | %10s | %15s | %10s | %25s | %25s |\n", row.id, row.rank, row.match_key, row.match_value, row.type, row.key, row.value))
+		end)
+		return
+	end
+
+
+	if (argv[2] == "show") then
+		
+		query = "SELECT * FROM fsfax_config order by match_key, match_value, type, key, rank"
+		
+		stream:write(string.format("\n\n| %10s | %10s | %10s | %15s | %10s | %25s | %25s |\n", "ID", "RANK", "MATCH_KEY", "MATCH_VALUE", "TYPE", "KEY", "VALUE"))
+		dbh:query(query, function(row)
+			stream:write(string.format("| %10s | %10s | %10s | %15s | %10s | %25s | %25s |\n", row.id, row.rank, row.match_key, row.match_value, row.type, row.key, row.value))
+		end)
+	end
+
+	if (argv[2] == "set") then
+		if (argv[8] == nil) then
+			stream:write("-USAGE: [match_key] [match_value] [type] [key] [value] [rank]")
+			return;
+		end
+		
+		query = "INSERT OR REPLACE INTO fsfax_config (match_key, match_value, type, key, value, rank) " 
+		.. " VALUES ('".. argv[3] .. "', '".. argv[4] .."', '".. argv[5] .."', '".. argv[6] .."', '".. argv[7] .."', '".. argv[8] .."')";
+
+		stream:write(query .. "\n")
+		dbh:query(query)
+	end
+
+
+	if (argv[2] == "del") then
+		if (argv[3] == nil) then
+			stream:write("-USAGE: [id]")
+			return;
+		end
+		
+		query = "DELETE FROM fsfax_config where id='".. argv[3] .. "'" 
+
+		stream:write(query .. "\n")
+		dbh:query(query)
+	end
+
 	return
 end
+
 
 
 if (argv[1] == "db") then
 	
 	if (argv[2] == nil) then
 		stream:write("-USAGE: [create, clear, drop]")
+		return;
 	end
+
+	query = ""
 
 	if (argv[2] == "create") then
 		if (argv[3] == nil) then
@@ -105,7 +170,7 @@ if (argv[1] == "db") then
 
 		if (argv[3] == "config" or argv[3] == "all") then
 			query = query 
-			 ..	"CREATE TABLE IF NOT EXISTS fsfax_config (id PRIMARY KEY, type, key, value, description); \n"
+			 ..	"CREATE TABLE IF NOT EXISTS fsfax_config (id INTEGER PRIMARY KEY, rank, match_key, match_value, type, key, value); \n"
 		end
 
 		if (argv[3] == "log" or argv[3] == "all") then
@@ -182,7 +247,7 @@ if (argv[1] == "route") then
 		end)
 
 	elseif (argv[2] == nil) then
-		stream:write("fax route [add] [del] [update] [show]\n")
+		stream:write("fax route [set, del, show]\n")
 	else
 		stream:write("fax unknown command.\n")
 	end
