@@ -197,7 +197,7 @@ end
 
 if (attach) then
 
-	subject = "[FAX] Recieved "
+	subject = "[FAX] Received "
 	if (fax_success == '0') then
 		subject = subject .. "with errors, "
 	end
@@ -221,7 +221,7 @@ else
 		fax_result_code = -fax_result_code
 	end
 
-	subject = "[FAX] Recieve Failure, " .. fax_result_text .. ", " .. fax_document_total_pages .." Page(s), from " .. caller_id_name .. " " .. fax_remote_station_id;
+	subject = "[FAX] Receive Failure, " .. fax_result_text .. ", " .. fax_document_total_pages .." Page(s), from " .. caller_id_name .. " " .. fax_remote_station_id;
 
 
 	headers = "From: "     .. from .. "\n" ..
