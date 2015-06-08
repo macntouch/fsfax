@@ -4,6 +4,9 @@ assert(dbh:connected()) -- exits the script if we didn't connect properly
 -- PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF; PRAGMA count_changes=OFF
 
 
+-- create one line of space to make any output easier to read.
+stream:write("\n")
+
 if (argv[1] == nil) then
 	stream:write("\n"
 	..	"FreeSWITCH FAX v0.0 by Bruce Marriner <bruce@bmts.us>\n" 
@@ -30,6 +33,7 @@ if (argv[1] == "init") then
 	if (argv[2] == "alias" or argv[2] == "all") then
 		api = freeswitch.API();
 		api:executeString("alias add fax lua fsfax/ctlfax.lua");
+        stream:write("FSFAX: fax alias created.\n")
 	end
 
 	if (argv[2] == "complete" or argv[2] == "all") then
@@ -72,6 +76,7 @@ if (argv[1] == "init") then
 		api:executeString("complete add fax config show");
 		api:executeString("complete add fax config set");
 		api:executeString("complete add fax config del");
+        stream:write("FSFAX: fax autocomplete entries created.\n")
 
 	end
 
