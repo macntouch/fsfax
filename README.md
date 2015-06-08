@@ -74,7 +74,7 @@ EMAIL   | Comma seperated list of e-mails to send fax to.
 Finally, for inbound faxes you need to configure FreeSWITCH to
 send calls to the rxfax.lua script.  To do this create a file rxfax.xml
 in /etc/freeswitch/dialplan/public or elsewhere if you are not using
-the default directories.  The below example will send all calls to rxfax.xml
+the default directories.  The below example will send all calls to rxfax.lua
 for a dedicated fax install.  You can adjust this to send only calls
 for specific DIDs into rxfax.xml if you wish.
 
