@@ -62,9 +62,10 @@ This can be done with the ```fax route set``` command from within the
 FreeSWITCH console. To view the existing routes type ```fax route show```.
 See below for a quick reference of each field. 
 
-| Field  | Description
-| DID    | The DID number to be routed.
-| EMAIL  | Comma seperated list of e-mails to send fax to.
+Field   | Description
+------- | -----------
+DID     | The DID number to be routed.
+EMAIL   | Comma seperated list of e-mails to send fax to.
 
 **NOTE**: If no route is defined for a call then that call will be dropped.
 
@@ -99,13 +100,14 @@ either the DID or CID of the session.  You can use the command
 view all configured variables.  See below for a basic reference
 of each field.
 
-| Field        | Description
-| match_key    | **CID** (Caller ID Number) or **DID**
-| match_value  | The actual CID or DID number
-| type         | only **session** is currently supported
-| key          | variable name 
-| value        | the value that the variable is set to
-| rank         | the rank, higher numbers override smaller numbers
+Field        | Description
+------------ | -------------------------------------
+match_key    | **CID** (Caller ID Number) or **DID**
+match_value  | The actual CID or DID number
+type         | only **session** is currently supported
+key          | variable name 
+value        | the value that the variable is set to
+rank         | the rank, higher numbers override smaller numbers
 
 
 TODO: Create table of valid variables.
