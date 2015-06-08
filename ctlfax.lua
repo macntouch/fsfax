@@ -1,8 +1,3 @@
--- Load local configuration file
--- somehow it should create this file
--- with defaults on install..
-loadfile("cfgfax")
-
 -- Connect to Database, this is auto-created.
 local dbh = freeswitch.Dbh("sqlite://fsfax") 
 assert(dbh:connected()) -- exits the script if we didn't connect properly
@@ -89,6 +84,11 @@ if (argv[1] == "init") then
 end
 
 if (argv[1] == "config") then
+	
+    if (argv[2] == nil) then
+		stream:write("-USAGE: config [show, set, del]")
+		return
+	end
 
 	-- temp section to test how configuration is applied
 	if (argv[2] == "test") then

@@ -88,7 +88,9 @@ local fsfax_call_duration = fsfax_hangup_time - fsfax_answered_time;
 Now the that the fax call is finished we will gather up a bunch of variables 
 and send out an e-mail notification then log the fax call.
 ]]
-
+-- http:// to FreeSWITCH FAX Docs, that do not exist.
+fsfax_domain = session:getVariable("fsfax_domain")
+fsfax_admin  = session:getVariable("fsfax_admin")
 
 
 -- http://wiki.freeswitch.org/wiki/Channel_Variables
@@ -154,7 +156,7 @@ if (t38_trace_read == nil)                 then t38_trace_read = ''; end
 
 
 to       = emailto
-from     = caller_id_name .. "<" .. caller_id_number .. "@".. domain ..">"
+from     = caller_id_name .. "<" .. caller_id_number .. "@".. fsfax_domain ..">"
 body     = "\n\n\n\n---\n"
 ..         "DETAILED FAX INFORMATION:\n"
 ..         "Called DID         :" .. destination_number .. "\n"
@@ -223,7 +225,7 @@ else
 
 	body     = "We're sorry but we were unable to receive any fax data from the caller..\n" .. body
 	freeswitch.consoleLog("info",uuid .. " fsfax: SENDING EMAIL -WITHOUT- ATTACHMENT\n")
-	email = freeswitch.email(admin, from, headers, body)
+	email = freeswitch.email(fsfax_admin, from, headers, body)
 end
 
 
