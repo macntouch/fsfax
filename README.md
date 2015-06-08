@@ -14,7 +14,7 @@ cd /usr/share/freeswitch/scripts/
 git clone https://github.com/bwmarrin/fsfax.git fsfax
 ```
 
-The configuration file (*cfgfax.lua*) must be created created manually.
+The configuration file (*cfgfax.lua*) must be created manually.
 In future versions I will try to have this created on first run.
 There are currently only two settings.  Edit the below values
 to match your needs.
