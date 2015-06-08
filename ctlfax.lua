@@ -8,9 +8,9 @@ assert(dbh:connected()) -- exits the script if we didn't connect properly
 stream:write("\n")
 
 if (argv[1] == nil) then
-	stream:write("\n"
+	stream:write(""
 	..	"FreeSWITCH FAX v0.0 by Bruce Marriner <bruce@bmts.us>\n" 
-	..	"Copyright 2014-2015 by Bruce Marriner. All rights reserved.\n" 
+	..	"Copyright 2014-2015. All rights reserved.\n" 
 	..	"Usage: fax [category] [command] [arguments]\n"
 	..	"init          - \n"
 	..	"config        - \n"
