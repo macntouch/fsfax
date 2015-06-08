@@ -7,7 +7,7 @@ and manage a FreeSWITCH based email fax server.
 While inbound faxing does work well, I would still call
 this project very experimental.  Outbound faxing has not 
 been completed yet and most of the database and console
-commands are likely to change as I work torward a stable
+commands are likely to change as I work toward a stable
 version.
 
 If you do use this project please take special note to
