@@ -1,3 +1,9 @@
+-- Load local configuration file
+-- somehow it should create this file
+-- with defaults on install..
+loadfile("cfgfax")
+
+-- Connect to Database, this is auto-created.
 local dbh = freeswitch.Dbh("sqlite://fsfax") 
 assert(dbh:connected()) -- exits the script if we didn't connect properly
 -- PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF; PRAGMA count_changes=OFF
@@ -6,7 +12,7 @@ assert(dbh:connected()) -- exits the script if we didn't connect properly
 if (argv[1] == nil) then
 	stream:write("\n"
 	..	"FreeSWITCH FAX v0.0 by Bruce Marriner <bruce@bmts.us>\n" 
-	..	"Copyright 2014 by BMT Solutions. All rights reserved.\n" 
+	..	"Copyright 2014-2015 by Bruce Marriner. All rights reserved.\n" 
 	..	"Usage: fax [category] [command] [arguments]\n"
 	..	"init          - \n"
 	..	"config        - \n"
@@ -28,7 +34,7 @@ if (argv[1] == "init") then
 	
 	if (argv[2] == "alias" or argv[2] == "all") then
 		api = freeswitch.API();
-		api:executeString("alias add fax lua fsfax/faxctl.lua");
+		api:executeString("alias add fax lua fsfax/ctlfax.lua");
 	end
 
 	if (argv[2] == "complete" or argv[2] == "all") then
@@ -70,12 +76,13 @@ if (argv[1] == "init") then
 		api:executeString("complete add fax config");
 		api:executeString("complete add fax config show");
 		api:executeString("complete add fax config set");
+		api:executeString("complete add fax config del");
 
 	end
 
 	if (argv[2] == "db" or argv[2] == "all") then
 		api = freeswitch.API();
-		api:executeString("lua fsfax/faxctl.lua db create all");
+		api:executeString("lua fsfax/ctlfax.lua db create all");
 	end
 
 	return;
@@ -85,15 +92,21 @@ if (argv[1] == "config") then
 
 	-- temp section to test how configuration is applied
 	if (argv[2] == "test") then
+
+		if (argv[3] == nil) then
+			argv[3] = ""
+		end
 		
+		if (argv[4] == nil) then
+			argv[4] = ""
+		end
 
 		query = "SELECT * FROM fsfax_config "
 		..      "WHERE type='session' "
 		..      "AND ( "
 		..      "      (match_key='*'   AND match_value='*' ) "
-		..      "   OR (match_key='DID' AND match_value='19187790871') " 
-		..      "   OR (match_key='CID' AND match_value='8779263747') "
-		..      "   OR (match_key='AID' AND match_value='1' ) "
+		..      "   OR (match_key='DID' AND match_value='" .. argv[3] .. "') " 
+		..      "   OR (match_key='CID' AND match_value='" .. argv[4] .. "') "
 		..      "    ) "
 		..      "order by match_key, match_value, type, key, rank"
 
