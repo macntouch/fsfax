@@ -31,7 +31,7 @@ Now, you can access the fsfax from the FreeSWITCH Console.
 From ```fs_cli``` run the below to view basic help.
 
 ```
-lua fsfax/faxctl.lua
+lua fsfax/ctlfax.lua
 ```
 
 Use the below command to set up aliases and autocomplete for
